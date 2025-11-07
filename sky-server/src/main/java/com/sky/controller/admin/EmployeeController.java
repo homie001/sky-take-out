@@ -102,4 +102,20 @@ public class EmployeeController {
         PageResult pageResult =employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
     }
+
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}") //@PathVariable("status")中的status是@PathVariable("status")中status，可省略
+    @ApiOperation("启用禁用员工账号")
+    // 为什么要加@PathVariable？该方法预期处理类似 /admin/employee/{status} 这样的请求路径
+    // 而id不需要加，因为通过地址栏传参
+    public Result starOrStop(@PathVariable Integer status, Long id){
+        log.info("启用禁用员工账号：{},{}",status,id);
+        employeeService.starOrStop(status,id);
+        return Result.success();
+    } // 只返回Code，并不需要查询，所以泛型可以不需要了
 }
