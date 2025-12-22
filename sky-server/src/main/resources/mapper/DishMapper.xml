@@ -44,4 +44,15 @@
         </set>
         where id = #{id} # 根据id更新
     </update>
+
+    <select id="list" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="name != null">and name like '%${name}%'</if>
+            <if test="categoryId != null">and category_id = #{categoryId}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
 </mapper>
