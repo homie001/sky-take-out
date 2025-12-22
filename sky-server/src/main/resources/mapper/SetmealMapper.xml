@@ -24,4 +24,8 @@
         </where>
         order by s.update_time desc
     </select>
+
+    <delete id="delete">
+        delete from setmeal where id = #{id}
+    </delete>
 </mapper>
