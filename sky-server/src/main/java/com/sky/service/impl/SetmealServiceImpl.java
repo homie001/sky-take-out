@@ -6,8 +6,10 @@ import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
@@ -33,6 +35,8 @@ public class SetmealServiceImpl implements SetmealService {
     private SetmealDishMapper setmealDishMapper;
     @Autowired
     private Properties pageHelperProperties;
+    @Autowired
+    private DishMapper dishMapper;
 
     /**
      * 新增套餐，同时需要保存套餐和菜品的关联关系
@@ -137,5 +141,32 @@ public class SetmealServiceImpl implements SetmealService {
 
         // 3.插入套餐和菜品的关联数据
         setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    /**
+     * 套餐起售、停售
+     * @param status
+     * @param id
+     */
+    public void setStatus(Integer status, Long id) {
+        //起售套餐时，判断套餐内是否有停售菜品，有停售菜品提示"套餐内包含未启售菜品，无法启售"
+        if (status == StatusConstant.ENABLE) {
+            List<Dish> dshList = dishMapper.getBySetmealId(id);
+            if(dshList != null && dshList.size() > 0){
+                dshList.forEach(dish -> {
+                    if (dish.getStatus() == StatusConstant.DISABLE) {
+                        throw new RuntimeException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                    }
+                });
+            }
+
+        }
+
+        Setmeal setmeal = Setmeal.builder()
+                .id(id)
+                .status(status)
+                .build();
+        setmealMapper.update(setmeal);
+        // Builder模式特性：Setmeal.builder() 只设置了需要更新的字段，这种方式是安全的，不会影响套餐的其他属性（如名称、价格、描述等）。
     }
 }
